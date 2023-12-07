@@ -1,10 +1,10 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
-
+//ssh -R 0:localhost:2560 serveo.net
 const app = express();
 const port = 3000;
-
+const multer = require('multer');
 const storagePath = path.join(__dirname, 'storage');
 
 app.use(express.static(storagePath));
