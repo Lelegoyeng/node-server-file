@@ -1,14 +1,39 @@
 const express = require('express');
-const path = require('path');
-const fs = require('fs');
-//ssh -R 0:localhost:2560 serveo.net
+const multer = require('multer');
+const path = require('path'); // Tambahkan modul path
 const app = express();
 const port = 3000;
-const multer = require('multer');
-const storagePath = path.join(__dirname, 'storage');
 
+// --------------------------- Storage Upload --------------------------- //
+const storagePath = path.join(__dirname, 'storage');
 app.use(express.static(storagePath));
 
+const storage = multer.diskStorage({
+    destination: './storage/',
+    filename: function (req, file, cb) {
+        cb(null, file.originalname);
+    },
+});
+
+const upload = multer({
+    storage: storage,
+}).single('myFile');
+
+app.get('/home', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+app.post('/upload', (req, res) => {
+    upload(req, res, (err) => {
+        if (err) {
+            res.status(400).json({ message: err.message });
+        } else {
+            res.json({ message: 'File uploaded successfully' });
+        }
+    });
+});
+
+// --------------------------- Storage Download --------------------------- //
 app.get('/listFiles', (req, res) => {
     fs.readdir(storagePath, (err, files) => {
         if (err) {
@@ -37,5 +62,5 @@ app.get('/download/:filename', (req, res) => {
 });
 
 app.listen(port, () => {
-    console.log(`Server is listening on port ${port}`);
+    console.log(`Server is running on port ${port}`);
 });
